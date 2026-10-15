@@ -1,0 +1,137 @@
+pipeline {
+    agent any
+    options { timestamps(); disableConcurrentBuilds() }
+
+    environment {
+        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Users\\Aaron Patric Johnson\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;C:\\Users\\Aaron Patric Johnson\\.docker\\bin;${env.PATH}"
+    }
+
+    stages {
+        stage('Connect to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-lms-q1', variable: 'KUBECONFIG')]) {
+                    powershell '''
+                        $ErrorActionPreference = 'Stop'
+                        kubectl --context docker-desktop get nodes
+                        if ($LASTEXITCODE -ne 0) { throw 'Jenkins cannot access Kubernetes using kubeconfig-lms-q1' }
+                        Write-Host 'JENKINS CONNECTED TO KUBERNETES'
+                    '''
+                }
+            }
+        }
+
+        stage('Q2 - Deploy Green v2') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-lms-q1', variable: 'KUBECONFIG')]) {
+                    powershell '''
+                        $ErrorActionPreference = 'Stop'
+                        kubectl --context docker-desktop set image deployment/food-ordering-green lms=aarxn06/food-ordering:v2
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 green deployment failed' }
+                        kubectl --context docker-desktop rollout restart deployment/food-ordering-green
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 green restart failed' }
+                        kubectl --context docker-desktop rollout status deployment/food-ordering-green --timeout=120s
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 green rollout unhealthy' }
+                        kubectl --context docker-desktop set selector service/food-ordering-service app=food-ordering,color=green
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 production traffic switch failed' }
+                        $ready = kubectl --context docker-desktop get deployment food-ordering-green -o jsonpath='{.status.readyReplicas}'
+                        $live = kubectl --context docker-desktop get service food-ordering-service -o jsonpath='{.spec.selector.color}'
+                        if ($ready -ne '3' -or $live -ne 'green') { throw 'Q2 green 3/3 or production selector not verified' }
+                        Write-Host 'Q2 JENKINS DEPLOYED GREEN V2: 3/3 PODS, PRODUCTION GREEN'
+                    '''
+                }
+            }
+        }
+
+        stage('Q2 - Fault and Blue-Green Rollback') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-lms-q1', variable: 'KUBECONFIG')]) {
+                    powershell '''
+                        $ErrorActionPreference = 'Stop'
+                        # Restore a known good BLUE baseline before creating a bad revision.
+                        kubectl --context docker-desktop set image deployment/food-ordering-blue lms=aarxn06/food-ordering:v1
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 baseline restoration failed' }
+                        kubectl --context docker-desktop rollout status deployment/food-ordering-blue --timeout=120s
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 blue baseline unhealthy' }
+                        kubectl --context docker-desktop set image deployment/food-ordering-blue lms=aarxn06/food-ordering:jenkins-bad-release
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 fault injection failed' }
+                        $ErrorActionPreference = 'Continue'
+                        kubectl --context docker-desktop rollout status deployment/food-ordering-blue --timeout=20s
+                        $failed = ($LASTEXITCODE -ne 0)
+                        $ErrorActionPreference = 'Stop'
+                        if (-not $failed) { throw 'Q2 unexpectedly accepted deliberately missing image' }
+                        Write-Host 'Q2 FAILED BLUE RELEASE DETECTED BY JENKINS'
+                        $live = kubectl --context docker-desktop get service food-ordering-service -o jsonpath='{.spec.selector.color}'
+                        $readyGreen = kubectl --context docker-desktop get deployment food-ordering-green -o jsonpath='{.status.readyReplicas}'
+                        if ($live -ne 'green' -or $readyGreen -ne '3') { throw 'Q2 production not preserved' }
+                        kubectl --context docker-desktop rollout undo deployment/food-ordering-blue
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 blue rollback command failed' }
+                        kubectl --context docker-desktop rollout status deployment/food-ordering-blue --timeout=120s
+                        if ($LASTEXITCODE -ne 0) { throw 'Q2 blue rollback unhealthy' }
+                        Write-Host 'Q2 JENKINS ROLLBACK SUCCESS: GREEN PRODUCTION PRESERVED 3/3'
+                    '''
+                }
+            }
+        }
+
+        stage('Q3 - Deploy Hospital v2') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-lms-q1', variable: 'KUBECONFIG')]) {
+                    powershell '''
+                        $ErrorActionPreference = 'Stop'
+                        kubectl --context docker-desktop set image deployment/hospital-appointment lms=aarxn06/hospital-appointment:v2
+                        if ($LASTEXITCODE -ne 0) { throw 'Q3 v2 deployment failed' }
+                        kubectl --context docker-desktop rollout restart deployment/hospital-appointment
+                        if ($LASTEXITCODE -ne 0) { throw 'Q3 v2 rollout restart failed' }
+                        kubectl --context docker-desktop rollout status deployment/hospital-appointment --timeout=120s
+                        if ($LASTEXITCODE -ne 0) { throw 'Q3 v2 not healthy' }
+                        $ready = kubectl --context docker-desktop get deployment hospital-appointment -o jsonpath='{.status.readyReplicas}'
+                        if ($ready -ne '3') { throw 'Q3 did not achieve 3/3' }
+                        Write-Host 'Q3 JENKINS DEPLOYED HOSPITAL V2: 3/3 PODS'
+                    '''
+                }
+            }
+        }
+
+        stage('Q3 - Fault and Automatic Rollback') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-lms-q1', variable: 'KUBECONFIG')]) {
+                    powershell '''
+                        $ErrorActionPreference = 'Stop'
+                        kubectl --context docker-desktop set image deployment/hospital-appointment lms=aarxn06/hospital-appointment:jenkins-bad-v3
+                        if ($LASTEXITCODE -ne 0) { throw 'Q3 fault injection failed' }
+                        $ErrorActionPreference = 'Continue'
+                        kubectl --context docker-desktop rollout status deployment/hospital-appointment --timeout=20s
+                        $failed = ($LASTEXITCODE -ne 0)
+                        $ErrorActionPreference = 'Stop'
+                        if (-not $failed) { throw 'Q3 unexpectedly accepted deliberately missing image' }
+                        Write-Host 'Q3 JENKINS DETECTED BAD V3 - STARTING AUTOMATIC ROLLBACK'
+                        kubectl --context docker-desktop rollout undo deployment/hospital-appointment
+                        if ($LASTEXITCODE -ne 0) { throw 'Q3 rollout undo failed' }
+                        kubectl --context docker-desktop rollout status deployment/hospital-appointment --timeout=120s
+                        if ($LASTEXITCODE -ne 0) { throw 'Q3 rollback rollout failed' }
+                        $ready = kubectl --context docker-desktop get deployment hospital-appointment -o jsonpath='{.status.readyReplicas}'
+                        $image = kubectl --context docker-desktop get deployment hospital-appointment -o jsonpath='{.spec.template.spec.containers[0].image}'
+                        if ($ready -ne '3' -or $image -ne 'aarxn06/hospital-appointment:v2') { throw "Q3 rollback verification failed: ready=$ready image=$image" }
+                        Write-Host 'Q3 JENKINS AUTOMATIC ROLLBACK SUCCESS: V2 RESTORED, 3/3 PODS'
+                    '''
+                }
+            }
+        }
+
+        stage('Final - Verify Both Apps') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-lms-q1', variable: 'KUBECONFIG')]) {
+                    powershell '''
+                        $ErrorActionPreference = 'Stop'
+                        kubectl --context docker-desktop get deployment food-ordering-green hospital-appointment
+                        if ($LASTEXITCODE -ne 0) { throw 'Final verification failed' }
+                        $q2 = kubectl --context docker-desktop get deployment food-ordering-green -o jsonpath='{.status.readyReplicas}'
+                        $q3 = kubectl --context docker-desktop get deployment hospital-appointment -o jsonpath='{.status.readyReplicas}'
+                        if ($q2 -ne '3' -or $q3 -ne '3') { throw "Final readiness mismatch: Q2=$q2 Q3=$q3" }
+                        Write-Host 'Q2 + Q3 JENKINS DEPLOYMENT AND ROLLBACK EVIDENCE COMPLETE'
+                    '''
+                }
+            }
+        }
+    }
+}
