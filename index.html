@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="University Learning Management Portal - courses, faculty, resources, assignments and exams" />
+  <title>CampusLearn | University Learning Management Portal</title>
+  <style>
+    :root { color-scheme: light; --ink:#17283f; --muted:#62758c; --blue:#2259b5; --light:#eaf1fc; --surface:#fff; --line:#dae4f0; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin:0; color:var(--ink); background:#f4f7fb; font:16px/1.55 system-ui,-apple-system,'Segoe UI',Arial,sans-serif; }
+    .bar { background:#142b4c; color:white; padding:.75rem 0; }
+    .wrap { max-width:1080px; margin:0 auto; padding:0 22px; }
+    .bar .wrap { display:flex; justify-content:space-between; align-items:center; gap:15px; }
+    .brand { color:#fff; text-decoration:none; font-size:1.25rem; font-weight:800; letter-spacing:-.03em; }
+    nav { display:flex; flex-wrap:wrap; gap:15px; }
+    nav a { color:#d9e5f8; text-decoration:none; font-size:.85rem; }
+    nav a:hover, nav a:focus { color:white; text-decoration:underline; }
+    .hero { background:linear-gradient(110deg,#18448a,#377bd3); color:white; padding:68px 0 58px; }
+    .hero h1 { max-width:710px; font-size:clamp(2rem,5vw,3.3rem); line-height:1.14; margin:13px 0 18px; letter-spacing:-.035em; }
+    .hero p { max-width:630px; color:#e4eefc; font-size:1.05rem; }
+    .tag { display:inline-block; padding:5px 11px; border-radius:100px; background:#d9e9ff; color:#16437e; font-weight:700; font-size:.75rem; }
+    .hero .tag { background:#eff5ff; }
+    .hero a.cta { display:inline-block; background:#fff; color:#154682; font-weight:700; padding:10px 16px; border-radius:8px; margin-top:12px; text-decoration:none; }
+    main { padding:30px 0 56px; }
+    section { margin:24px 0 38px; scroll-margin-top:30px; }
+    h2 { font-size:1.55rem; margin:0 0 6px; letter-spacing:-.025em; }
+    .sub { margin:0 0 18px; color:var(--muted); }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    .two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .card { padding:21px; background:var(--surface); border:1px solid var(--line); border-radius:13px; box-shadow:0 2px 7px #1b3b6508; }
+    .card h3 { font-size:1.1rem; margin:6px 0 7px; }
+    .card p { margin:0; color:var(--muted); }
+    .meta { color:var(--blue); text-transform:uppercase; font-size:.75rem; font-weight:800; letter-spacing:.055em; }
+    .item { display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
+    .item:last-child { border-bottom:0; }
+    .item strong { display:block; }
+    .item small { color:var(--muted); }
+    .chip { flex-shrink:0; background:var(--light); color:#1b4c95; border-radius:100px; padding:4px 9px; font-size:.75rem; font-weight:700; }
+    footer { background:#142b4c; color:#d0dcf0; padding:24px 0; font-size:.88rem; }
+    @media (max-width:760px) { .bar .wrap { align-items:flex-start; flex-direction:column; } .grid,.two { grid-template-columns:1fr; } .hero { padding:44px 0; } }
+  </style>
+</head>
+<body>
+  <header class="bar"><div class="wrap"><a href="#top" class="brand">🎓 CampusLearn</a><nav aria-label="Main navigation"><a href="#courses">Courses</a><a href="#faculty">Faculty</a><a href="#resources">Resources</a><a href="#assignments">Assignments</a><a href="#examinations">Examinations</a></nav></div></header>
+  <div id="top" class="hero"><div class="wrap"><span class="tag">Academic Portal • Release 1.0</span><h1>Everything you need for a better learning journey.</h1><p>Find your courses, meet your faculty, access learning resources, check assignment announcements, and plan your examinations—all in one place.</p><a class="cta" href="#courses">Explore courses →</a></div></div>
+  <main class="wrap">
+    <section id="courses"><h2>Featured Courses</h2><p class="sub">Course Information for the current semester.</p><div class="grid">
+      <article class="card"><span class="meta">ISWE406P</span><h3>Agile Development &amp; DevOps</h3><p>CI/CD pipelines, Docker, Jenkins, and Kubernetes.</p><p style="margin-top:14px"><span class="chip">4 Credits</span></p></article>
+      <article class="card"><span class="meta">CSE301</span><h3>Database Management Systems</h3><p>Database design, relational models, and SQL fundamentals.</p><p style="margin-top:14px"><span class="chip">3 Credits</span></p></article>
+      <article class="card"><span class="meta">CSE302</span><h3>Computer Networks</h3><p>Networking protocols, architectures, and secure communication.</p><p style="margin-top:14px"><span class="chip">3 Credits</span></p></article>
+    </div></section>
+    <section id="faculty"><h2>Faculty Profiles</h2><p class="sub">Connect with experienced educators.</p><div class="grid">
+      <article class="card"><span class="meta">Professor</span><h3>Dr. Ananya Rao</h3><p>Agile Software Engineering<br/>Office hours: Monday, 2–4 PM</p></article>
+      <article class="card"><span class="meta">Associate Professor</span><h3>Dr. Vikram Shah</h3><p>Database Systems<br/>Office hours: Tuesday, 11 AM–1 PM</p></article>
+      <article class="card"><span class="meta">Assistant Professor</span><h3>Ms. Meera Thomas</h3><p>Computer Networks<br/>Office hours: Friday, 10 AM–12 PM</p></article>
+    </div></section>
+    <section id="resources"><h2>Learning Resources</h2><p class="sub">Reference materials and study aids.</p><div class="grid two">
+      <div class="card"><div class="item"><div><strong>DevOps Lab Guide</strong><small>CI/CD, Docker and Kubernetes reference</small></div><span class="chip">Guide</span></div><div class="item"><div><strong>Course Lecture Slides</strong><small>Weekly learning modules</small></div><span class="chip">Slides</span></div></div>
+      <div class="card"><div class="item"><div><strong>Code Examples</strong><small>HTML/CSS and containerization samples</small></div><span class="chip">Code</span></div><div class="item"><div><strong>Practice Questions</strong><small>Revision and assessment preparation</small></div><span class="chip">Practice</span></div></div>
+    </div></section>
+    <section id="assignments"><h2>Assignment Announcements</h2><p class="sub">Upcoming coursework deadlines (illustrative dates).</p><div class="grid two">
+      <div class="card"><div class="item"><div><strong>Docker Containerization Lab</strong><small>Build and verify a website in Docker</small></div><span class="chip">22 Oct</span></div><div class="item"><div><strong>CI/CD Pipeline Demonstration</strong><small>Automate build, push and deploy</small></div><span class="chip">29 Oct</span></div></div>
+      <div class="card"><div class="item"><div><strong>Database Design Report</strong><small>ER diagrams and normalization</small></div><span class="chip">24 Oct</span></div><div class="item"><div><strong>Network Simulation</strong><small>Protocol analysis practical</small></div><span class="chip">31 Oct</span></div></div>
+    </div></section>
+    <section id="examinations"><h2>Examination Schedules</h2><p class="sub">Sample schedule—confirm your actual timetable with your university.</p><div class="grid two">
+      <div class="card"><div class="item"><div><strong>Agile Development &amp; DevOps</strong><small>Lab Assessment • 9:00 AM</small></div><span class="chip">5 Nov</span></div><div class="item"><div><strong>Database Systems</strong><small>Written Examination • 10:00 AM</small></div><span class="chip">7 Nov</span></div></div>
+      <div class="card"><div class="item"><div><strong>Computer Networks</strong><small>Written Examination • 2:00 PM</small></div><span class="chip">10 Nov</span></div><div class="item"><div><strong>Lab Viva</strong><small>Practical demonstration • 11:00 AM</small></div><span class="chip">12 Nov</span></div></div>
+    </div></section>
+  </main>
+  <footer><div class="wrap">© 2026 CampusLearn University Learning Management Portal • Demo project for DevOps Lab Q1</div></footer>
+</body>
+</html>
