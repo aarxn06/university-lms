@@ -65,7 +65,7 @@ pipeline {
         }
         stage('Push Image to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-lms-q1', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
                     powershell '''
                       $env:DH_TOKEN | docker login -u $env:DH_USER --password-stdin
                       if ($LASTEXITCODE -ne 0) { throw 'Docker Hub login failed' }
