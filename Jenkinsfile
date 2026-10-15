@@ -10,7 +10,7 @@ pipeline {
     IMAGE_REPO = 'aarxn06/university-lms'
     DEPLOYMENT_NAME = 'university-lms'
     K8S_NAMESPACE = 'default'
-    PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+    PATH = "C:\\Users\\Aaron Patric Johnson\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
 }
     stages {
         stage('Clone Code') {
