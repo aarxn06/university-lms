@@ -7,10 +7,11 @@ pipeline {
         disableConcurrentBuilds()
     }
     environment {
-        IMAGE_REPO = 'aarxn06/university-lms' // CHANGE THIS
-        DEPLOYMENT_NAME = 'university-lms'
-        K8S_NAMESPACE = 'default'
-    }
+    IMAGE_REPO = 'aarxn06/university-lms'
+    DEPLOYMENT_NAME = 'university-lms'
+    K8S_NAMESPACE = 'default'
+    PATH+DOCKER = 'C:\\Program Files\\Docker\\Docker\\resources\\bin'
+}
     stages {
         stage('Clone Code') {
             steps { checkout scm }
