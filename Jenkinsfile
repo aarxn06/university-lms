@@ -68,7 +68,22 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-lms-q1', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
                     powershell '''
-                      $env:DH_TOKEN | docker login -u $env:DH_USER --password-stdin
+                      if ([string]::IsNullOrWhiteSpace($env:DH_TOKEN)) { throw 'Jenkins credential token is empty' }
+                      $psi = New-Object System.Diagnostics.ProcessStartInfo
+                      $psi.FileName = (Get-Command docker.exe).Source
+                      $psi.Arguments = 'login --username aarxn06 --password-stdin'
+                      $psi.UseShellExecute = $false
+                      $psi.RedirectStandardInput = $true
+                      $psi.RedirectStandardOutput = $true
+                      $psi.RedirectStandardError = $true
+                      $proc = [System.Diagnostics.Process]::Start($psi)
+                      $proc.StandardInput.WriteLine($env:DH_TOKEN)
+                      $proc.StandardInput.Close()
+                      $stdout = $proc.StandardOutput.ReadToEnd()
+                      $stderr = $proc.StandardError.ReadToEnd()
+                      $proc.WaitForExit()
+                      if ($stdout) { Write-Host $stdout }
+                      if ($proc.ExitCode -ne 0) { throw ('Docker Hub login failed: ' + $stderr) }
                       if ($LASTEXITCODE -ne 0) { throw 'Docker Hub login failed' }
                       $image = '{0}:{1}' -f $env:IMAGE_REPO, $env:BUILD_NUMBER
                       docker push $image
