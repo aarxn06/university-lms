@@ -5,7 +5,7 @@ pipeline {
     options {
         timestamps()
         disableConcurrentBuilds()
-    }x
+    }
     environment {
         IMAGE_REPO = 'aarxn06/university-lms' // CHANGE THIS
         DEPLOYMENT_NAME = 'university-lms'
