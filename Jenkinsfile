@@ -66,7 +66,7 @@ pipeline {
         }
         stage('Push Image to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-lms-q1', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-lms-verified', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
                     powershell '''
                       if ($env:DH_USER -ne 'aarxn06') { throw 'Jenkins Docker Hub username is incorrect; edit credential dockerhub-lms-q1' }
                       $token = $env:DH_TOKEN.Trim()
