@@ -78,7 +78,7 @@ pipeline {
         }
         stage('Deploy & Health Check') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-lms-q1', variable: 'KUBECONFIG')]) {
                     powershell '''
                       $ErrorActionPreference = 'Stop'
                       $image = '{0}:{1}' -f $env:IMAGE_REPO, $env:BUILD_NUMBER
@@ -105,3 +105,4 @@ pipeline {
         }
     }
 }
+
